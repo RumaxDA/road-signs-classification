@@ -1,9 +1,58 @@
-# Ignore all .pyc files
+# =========================
+# PYTHON
+# =========================
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
 
-# Ignore all files in the .vscode directory
-.vscode/
-
-# Ignore the myenv directory
+# Virtual environment
 venv/
-.venv/
+ml/venv/
+
+# =========================
+# DATASETS (NIE wrzucamy danych do repo)
+# =========================
+ml/data/
+ml/images/
+ml/others/
+
+# =========================
+# MODELE (duże pliki .pt / .h5)
+# =========================
+ml/trained_models/
+*.pt
+*.h5
+*.keras
+
+# =========================
+# WYKRESY / GENEROWANE PLIKI
+# =========================
+ml/plots/
+ml/Magisterka/
+
+# =========================
+# JUPYTER
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# SYSTEM
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# LOGI
+# =========================
+*.log
