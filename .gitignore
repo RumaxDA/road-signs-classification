@@ -56,3 +56,7 @@ Thumbs.db
 # LOGI
 # =========================
 *.log
+
+runs/
+ml/debug_crops/
+ml/videos/

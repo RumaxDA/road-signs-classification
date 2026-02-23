@@ -1,5 +1,7 @@
-tensorflow
+tensorflow[and-cuda]
 opencv-python
 scikit-learn
 pandas
 tqdm
+matplotlib
+seaborn
