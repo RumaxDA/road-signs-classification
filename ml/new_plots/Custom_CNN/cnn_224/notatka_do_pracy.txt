@@ -1,0 +1,5 @@
+Skrajna interpolacja (Upscaling): Rozciągnięcie znaku 30x30 pikseli do rozmiaru 224x224 tworzy ogromne, 
+sztuczne bloki pikseli. To niszczy cechy wizualne.
+Klątwa wielowymiarowości (Overfitting): Przy 224x224 obraz na wejściu ma 224 x 224 x 3 = 150 528 wartości.
+Przy 48x48 to tylko 6 912 wartości. Przy tak gigantycznym wejściu model uczył się na pamięć "szumu interpolacyjnego" 
+i artefaktów tła, zamiast samego kształtu znaku.
