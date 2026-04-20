@@ -9,10 +9,13 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-
+runs/
 # Virtual environment
 venv/
 ml/venv/
+
+# environment
+.env
 
 # =========================
 # DATASETS (NIE wrzucamy danych do repo)
@@ -25,9 +28,13 @@ ml/others/
 # MODELE (duże pliki .pt / .h5)
 # =========================
 ml/trained_models/
+ml/new_trained_models/
 *.pt
 *.h5
 *.keras
+*.weights
+
+ml/YOLO/
 
 # =========================
 # WYKRESY / GENEROWANE PLIKI
@@ -46,6 +53,7 @@ ml/Magisterka/
 .DS_Store
 Thumbs.db
 
+
 # =========================
 # IDE
 # =========================
@@ -60,4 +68,11 @@ Thumbs.db
 runs/
 ml/debug_crops/
 ml/videos/
-ml/experiment/
+ml/experiments/
+ml/example/
+
+
+backend/app/static/
+
+
+
