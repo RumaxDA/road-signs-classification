@@ -1,0 +1,21 @@
+=== RAPORT: TEST ODPORNOŚCI (ROBUSTNESS TEST) ===
+Model: cnn_48_v1.keras
+Rozdzielczość: 48x48
+Baseline Accuracy (Czyste dane): 0.9876
+--------------------------------------------------
+
+--- ZAKŁÓCENIE: NOISE ---
+Poziom Lekki: 0.9380
+Poziom Średni: 0.6167
+Poziom Mocny: 0.3946
+
+--- ZAKŁÓCENIE: BLUR ---
+Poziom Lekki: 0.9873
+Poziom Średni: 0.9857
+Poziom Mocny: 0.9790
+
+--- ZAKŁÓCENIE: DARKNESS ---
+Poziom Lekki: 0.9869
+Poziom Średni: 0.9866
+Poziom Mocny: 0.8964
+

@@ -1,0 +1,21 @@
+=== RAPORT: TEST ODPORNOŚCI (ROBUSTNESS TEST) ===
+Model: efficientnet_b0_224_v1.keras
+Rozdzielczość: 224x224
+Baseline Accuracy (Czyste dane): 0.8603
+--------------------------------------------------
+
+--- ZAKŁÓCENIE: NOISE ---
+Poziom Lekki: 0.6019
+Poziom Średni: 0.3639
+Poziom Mocny: 0.2559
+
+--- ZAKŁÓCENIE: BLUR ---
+Poziom Lekki: 0.8610
+Poziom Średni: 0.8606
+Poziom Mocny: 0.8542
+
+--- ZAKŁÓCENIE: DARKNESS ---
+Poziom Lekki: 0.8374
+Poziom Średni: 0.7403
+Poziom Mocny: 0.4914
+
