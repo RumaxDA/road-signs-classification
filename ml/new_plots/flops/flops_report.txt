@@ -1,10 +1,10 @@
 =================================================================
 MODEL                     | PARAMETRY       | FLOPS
 -----------------------------------------------------------------
-Custom CNN (32x32)        | 94.03 K         | 49.36 MFLOPs
+Custom CNN (32x32)        | 94.60 K         | 49.26 MFLOPs
 Custom CNN (48x48)        | 333.19 K        | 174.59 MFLOPs
-Custom CNN (96x96)        | 332.88 K        | 699.12 MFLOPs
-Custom CNN (224x224)      | 332.88 K        | 3.806 GFLOPs
+Custom CNN (96x96)        | 333.19 K        | 698.09 MFLOPs
+Custom CNN (224x224)      | 333.19 K        | 3.800 GFLOPs
 EfficientNet (32x32)      | 4.11 M          | 17.83 MFLOPs
 EfficientNet (48x48)      | 4.11 M          | 47.31 MFLOPs
 EfficientNet (96x96)      | 4.11 M          | 148.34 MFLOPs
