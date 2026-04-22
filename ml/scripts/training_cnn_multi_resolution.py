@@ -22,7 +22,7 @@ EPOCHS = 30
 SEED = 42
 LR = 1e-3
 
-RESOLUTIONS = [224] 
+RESOLUTIONS = [32, 48, 96, 224] 
 
 def load_and_preprocess(path, x1, y1, x2, y2, label, img_size):
     file_content = tf.io.read_file(path)
@@ -52,7 +52,7 @@ def build_cnn(img_size):
     x = RandomContrast(0.1)(x)
 
     def conv_block(x, filters):
-        x = Conv2D(filters, (3, 3), padding='same', kernel_regularizer=l2(1e-4))(x)
+        x = Conv2D(filters, (3, 3), padding='same', use_bias=False, kernel_regularizer=l2(1e-4))(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         return x
@@ -77,10 +77,13 @@ def build_cnn(img_size):
         x = Dropout(0.4)(x)
 
     x = GlobalAveragePooling2D()(x)
-    x = Dense(256, activation='relu', kernel_regularizer=l2(1e-4))(x)
-    x = Dropout(0.5)(x)
-    outputs = Dense(NUM_CLASSES, activation='softmax')(x)
     
+    x = Dense(256, use_bias=False, kernel_regularizer=l2(1e-4))(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Dropout(0.5)(x)
+
+    outputs = Dense(NUM_CLASSES, activation='softmax')(x)
     return Model(inputs, outputs)
 
 if __name__ == "__main__":

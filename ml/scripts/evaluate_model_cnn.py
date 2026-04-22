@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import tensorflow as tf
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import roc_curve, auc
-from sklearn.preprocessing import label_binarize
 
 # === KONFIGURACJA GPU ===
 gpus = tf.config.list_physical_devices('GPU')
@@ -25,15 +23,15 @@ NUM_CATEGORIES = 43
 TEST_CSV_PATH = '/home/rumaxx/road-signs-project/ml/data/Test.csv'
 TEST_ROOT_DIR = '/home/rumaxx/road-signs-project/ml/data'
 # === CNN KATALOG PLOTS ===
-PLOTS_DIR = '/home/rumaxx/road-signs-project/ml/new_plots/Custom_CNN/cnn_32'
+PLOTS_DIR = '/home/rumaxx/road-signs-project/ml/new_plots/Custom_CNN/cnn_224'
 # === MOBILENETV2 KATALOG PLOTS ===
 os.makedirs(PLOTS_DIR, exist_ok=True)
 BATCH_SIZE = 32
-IMG_HEIGHT, IMG_WIDTH = 32, 32
+IMG_HEIGHT, IMG_WIDTH = 224, 224
 
 # === WYBÓR MODELU ===
-MODEL_PATH = '/home/rumaxx/road-signs-project/ml/new_trained_models/CNN/cnn_32/cnn_32_v1.keras'
-HISTORY_PATH = '/home/rumaxx/road-signs-project/ml/new_trained_models/CNN/cnn_32/cnn_32_history_v1.json'
+MODEL_PATH = '/home/rumaxx/road-signs-project/ml/new_trained_models/CNN/cnn_224/cnn_224_v1.keras'
+HISTORY_PATH = '/home/rumaxx/road-signs-project/ml/new_trained_models/CNN/cnn_224/cnn_224_history_v1.json'
 
 # === FUNKCJE POMOCNICZE (WYKRESY) ===
 def plot_history(history, name):
@@ -126,43 +124,23 @@ def plot_conf_mat_normalized(y_true, y_pred, name):
 
     print(f"✓ Zapisano znormalizowaną macierz: {save_path}")
 
-# === ROC + AUC (multi-class) ===
-def plot_roc_auc(y_true, y_pred_probs, name):
-
-    y_true_bin = label_binarize(y_true, classes=range(NUM_CATEGORIES))
-
-    fpr = {}
-    tpr = {}
-    roc_auc = {}
-
-    for i in range(NUM_CATEGORIES):
-        fpr[i], tpr[i], _ = roc_curve(y_true_bin[:, i], y_pred_probs[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
-
-    plt.figure(figsize=(8,8))
-
-    for i in range(NUM_CATEGORIES):
-        plt.plot(fpr[i], tpr[i], alpha=0.3)
-
-    plt.plot([0,1],[0,1],'k--')
-
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title(f"{name} ROC Curves")
-
-    save_path = os.path.join(PLOTS_DIR, f"{name}_roc_curves.png")
-    plt.savefig(save_path)
-    plt.close()
-
-    mean_auc = np.mean(list(roc_auc.values()))
-    print(f"Średnie AUC: {mean_auc:.4f}")
-
 # === CONFIDENCE DISTRIBUTION ===
 def plot_confidence_distribution(y_true, y_pred, y_pred_probs, name):
     confidences = np.max(y_pred_probs, axis=1)
 
     correct_conf = confidences[y_true == y_pred]
     incorrect_conf = confidences[y_true != y_pred]
+
+    # zmiana
+
+    avg_correct = np.mean(correct_conf) if len(correct_conf) > 0 else 0
+    avg_incorrect = np.mean(incorrect_conf) if len(incorrect_conf) > 0 else 0
+    
+    print(f"\nStatystyki pewności (Confidence):")
+    print(f"Średnia pewność przy poprawnych: {avg_correct:.4f}")
+    print(f"Średnia pewność przy błędnych:   {avg_incorrect:.4f}")
+
+    # zmiana
 
     plt.figure(figsize=(10, 6))
 
@@ -184,6 +162,8 @@ def plot_confidence_distribution(y_true, y_pred, y_pred_probs, name):
     plt.savefig(save_path)
     plt.close()
     print(f"✓ Zapisano histogram pewności: {save_path}")
+
+    return avg_correct, avg_incorrect
 
 
 # === NAJCZESCIEJ MYLONE KLASY === 
@@ -221,7 +201,7 @@ if __name__ == "__main__":
     filename = os.path.basename(MODEL_PATH)
     print(f"=== ROZPOCZYNAM EWALUACJĘ MODELU: {filename} ===")
 
-    model_display_name = "Custom_CNN"
+    model_display_name = "CNN_224"
 
 
     # Wczytanie CSV
@@ -293,7 +273,6 @@ if __name__ == "__main__":
     # Macierz pomyłek
     plot_conf_mat(y_true, y_pred, model_display_name)
     plot_conf_mat_normalized(y_true, y_pred, model_display_name)
-    plot_roc_auc(y_true, y_pred_probs, model_display_name)
 
     # Rozkład pewności siebie
     plot_confidence_distribution(y_true, y_pred, y_pred_probs, model_display_name)
@@ -303,6 +282,8 @@ if __name__ == "__main__":
     top1, top3, top5 = compute_topk(y_true, y_pred_probs)
 
     # ===== ZAPIS DO PLIKU =====
+    avg_corr, avg_incorr = plot_confidence_distribution(y_true, y_pred, y_pred_probs, model_display_name)
+
     report_path = os.path.join(PLOTS_DIR, f"{model_display_name}_full_report.txt")
     with open(report_path,"w") as f:
         # NOWE METRYKI W RAPORCIE
@@ -319,15 +300,16 @@ if __name__ == "__main__":
         f.write(f"Top-3: {top3:.4f}\n")
         f.write(f"Top-5: {top5:.4f}\n")
 
+        f.write("\n=== Analiza Pewności (Confidence) ===\n")
+        f.write(f"Avg Confidence (Correct):   {avg_corr:.4f}\n")
+        f.write(f"Avg Confidence (Incorrect): {avg_incorr:.4f}\n")
+
+        if avg_incorr > 0.80:
+            f.write("UWAGA: Model wykazuje silny OVERCONFIDENCE przy błędach!\n")
+
         # Najczęściej mylone klasy
         f.write("\n=== Najczęściej mylone klasy ===\n")
         for true, pred, count in misclassified:
             f.write(f"True {true} → Pred {pred} : {count}\n")
-
-        # Średnie AUC
-        y_true_bin = label_binarize(y_true, classes=range(NUM_CATEGORIES))
-        roc_auc_vals = [auc(*roc_curve(y_true_bin[:,i], y_pred_probs[:,i])[:2]) for i in range(NUM_CATEGORIES)]
-        mean_auc = np.mean(roc_auc_vals)
-        f.write(f"\n=== Mean ROC AUC ===\n{mean_auc:.4f}\n")
 
     print(f"✓ Raport zapisany: {report_path}")
