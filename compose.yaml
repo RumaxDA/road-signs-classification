@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:18-alpine
-    container_name: road_signs_db
+    container_name: db
     restart: always
     env_file:
       - .env
@@ -13,11 +13,13 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - postgres_sign_recognition:/var/lib/postgresql/data
+      - postgres_sign_recognition:/var/lib/postgresql
 
-  backend:
-    build: ./backend
-    container_name: road_signs_backend
+  backend_road_signs:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_road_signs
     restart: always
     env_file:
       - .env
@@ -28,6 +30,21 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
+    
+  frontend_road_signs:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_road_signs
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOOLING=true
+    depends_on:
+      - backend_road_signs
 
 volumes:
   postgres_sign_recognition:

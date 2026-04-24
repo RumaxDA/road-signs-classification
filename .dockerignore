@@ -1,6 +1,8 @@
 # === ŚRODOWISKO WIRTUALNE ===
-# KRYTYCZNE: Nigdy nie kopiuj venv do obrazu! Docker ma własnego, globalnego Pythona.
+ml/venv/
+backend/venv/
 venv/
+.venv/
 env/
 .env
 
@@ -11,16 +13,17 @@ __pycache__/
 *.pyd
 .pytest_cache/
 
-# === DANE UCZĄCE I WYKRESY ===
-# Obraz ma służyć do inferencji, a nie do trzymania gigabajtów zbioru GTSRB.
-data/
-new_plots/
+# === FOLDER ML (GŁÓWNY WINOWAJCA) ===
+# Ignorujemy całe gigabajty danych, wykresów i skryptów badawczych
+ml/data/
+ml/new_plots/
+ml/evaluate/
+ml/scripts/
 
 # === MODELE (Zarządzanie wagami) ===
-# Ignorujemy cały folder z historią i eksperymentami...
-new_trained_models/*
-# ...ale ROBIMY WYJĄTEK (!) dla tego jednego, najlepszego modelu, który API musi wczytać
-!new_trained_models/cnn_48_v1.keras
+# Ignorujemy wszystkie modele...
+ml/new_trained_models/*
+
 
 # === IDE I KONTROLA WERSJI ===
 .vscode/
@@ -29,7 +32,6 @@ new_trained_models/*
 .gitignore
 
 # === JUPYTER NOTEBOOKS ===
-# Brudnopisy nie lecą na produkcję
 .ipynb_checkpoints/
 *.ipynb
 
