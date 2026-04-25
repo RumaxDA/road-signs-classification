@@ -86,7 +86,7 @@ class TrafficSignSystem:
 # === PRZYKŁAD UŻYCIA ===
 if __name__ == "__main__":
     YOLO_PATH = 'ml/YOLO/yolo_universal_sign_det/weights/best.pt'
-    CNN_PATH = 'ml/new_trained_models/cnn_224_v3.keras'
+    CNN_PATH = 'ml/new_trained_models/cnn_48_v1.keras'
     
     system = TrafficSignSystem(YOLO_PATH, CNN_PATH)
     

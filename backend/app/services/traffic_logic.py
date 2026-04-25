@@ -9,7 +9,7 @@ class TrafficSignSystem:
         print("--- Inicjalizacja systemów rozpoznawania ---")
         self.detector = YOLO(yolo_path)
         self.classifier = tf.keras.models.load_model(cnn_path)
-        self.img_size = 224
+        self.img_size = 48
         self.min_confidence = 0.5  # 50%
         
         self.classes = {
