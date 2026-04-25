@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import detection
 from app.database import Base, engine
-from app.models.history import DetecionHistory
+from app.models.history import DetectionHistory
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

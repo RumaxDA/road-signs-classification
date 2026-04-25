@@ -10,8 +10,8 @@ class TrafficSignSystem:
         self.detector = YOLO(yolo_path)
         self.classifier = tf.keras.models.load_model(cnn_path)
         self.img_size = 48
-        self.min_confidence = 0.5  # 50%
-        
+        self.min_confidence = 0.5 
+
         self.classes = {
             0: 'Ograniczenie prędkości (20km/h)', 1: 'Ograniczenie prędkości (30km/h)', 
             2: 'Ograniczenie prędkości (50km/h)', 3: 'Ograniczenie prędkości (60km/h)', 
@@ -59,7 +59,7 @@ class TrafficSignSystem:
             x1, y1, x2, y2 = max(0, x1), max(0, y1), min(w, x2), min(h, y2)
             box_w, box_h = x2 - x1, y2 - y1
 
-            # --- DEBUG: Sprawdźmy co wycięło YOLO ---
+            # --- DEBUG: co wycięło YOLO ---
             print(f"DEBUG: YOLO znalazło obiekt: {x1, y1, x2, y2}")
             
 
