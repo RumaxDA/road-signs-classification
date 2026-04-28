@@ -2,15 +2,16 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from ultralytics import YOLO
-from app.core.config import Settings
+from app.core.config import settings
 
 class TrafficSignSystem:
-    def __init__(self, yolo_path, cnn_path):
+    def __init__(self, yolo_path, cnn_path, img_size):
         print("--- Inicjalizacja systemów rozpoznawania ---")
         self.detector = YOLO(yolo_path)
         self.classifier = tf.keras.models.load_model(cnn_path)
-        self.img_size = 48
+        self.img_size = img_size
         self.min_confidence = 0.5 
+        
 
         self.classes = {
             0: 'Ograniczenie prędkości (20km/h)', 1: 'Ograniczenie prędkości (30km/h)', 
@@ -38,7 +39,7 @@ class TrafficSignSystem:
         img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
         img = cv2.GaussianBlur(img, (3, 3), 0)
         img = cv2.resize(img, (self.img_size, self.img_size), interpolation=cv2.INTER_CUBIC)
-        img = img.astype("float32") / 255.0
+        img = img.astype("float32") # / 255.0 TRANSFER LEARNING PROCESSING
         return np.expand_dims(img, axis=0)
 
     def predict(self, frame):
@@ -90,12 +91,13 @@ class TrafficSignSystem:
         return results_list
 
 if __name__ == "__main__":
-    YOLO_PATH = Settings.YOLO_MODEL_PATH
-    CNN_PATH = Settings.CNN_MODEL_PATH
+    YOLO_PATH = settings.YOLO_MODEL_PATH
+    CNN_PATH = settings.CNN_MODEL_PATH
+    TL_PATH = settings.TL_MODEL_PATH
     
-    system = TrafficSignSystem(YOLO_PATH, CNN_PATH)
+    system = TrafficSignSystem(YOLO_PATH, TL_PATH, 224)
     
-    test_img = cv2.imread('ml/others/sign33.jpg')
+    test_img = cv2.imread('app/services/sign25.jpg')
     if test_img is not None:
         predictions = system.predict(test_img)
         print("\nWyniki rozpoznawania (JSON):")
