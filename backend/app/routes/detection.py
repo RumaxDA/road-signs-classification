@@ -1,25 +1,24 @@
 import time
-from fastapi import APIRouter, UploadFile, File, Depends
-from sqlalchemy import select, func
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends, Query
+from sqlalchemy import select, func, update
 import cv2
 import numpy as np
-from app.services.traffic_logic import TrafficSignSystem
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.history import DetectionHistory
-from app.core.config import settings
-
-system = TrafficSignSystem(settings.YOLO_MODEL_PATH, settings.CNN_MODEL_PATH)
+from app.services.model_manager import ModelVersion, model_manager
+from app.schemas.history import History, UpdateHistory
 
 router = APIRouter(prefix="/detection", tags=["AI Detection"])
 
 @router.post("/predict")
 async def predict_signs(
     file: UploadFile = File(...),
-    model_version: str = "CNN_48_v1",
+    model_version: ModelVersion = Query(ModelVersion.CNN_48),
     db: AsyncSession = Depends(get_db)
     ):
     # Odczyt 
+    active_system = model_manager.get_model(model_version)
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -28,7 +27,7 @@ async def predict_signs(
     start_time = time.perf_counter()
 
     # Detekcja
-    detections = system.predict(frame)
+    detections = active_system.predict(frame)
 
     # Stop czas i konwersja na ms
     end_time = time.perf_counter()
@@ -91,3 +90,46 @@ async def get_history(
         "sort_by": sort_by,
         "order": order
     }
+
+@router.get("/history_list", response_model = list[History])
+async def get_all_history(db: AsyncSession= Depends(get_db)):
+    query = select(DetectionHistory).order_by(DetectionHistory.id)
+    result = await db.execute(query)
+    return result.scalars().all()
+
+@router.get("/history/{history_id}", response_model = History)
+async def get_single_history(history_id : int, db: AsyncSession = Depends(get_db)):
+    query = await db.execute(select(DetectionHistory).where(DetectionHistory.id == history_id))
+    return query.scalars().first()
+
+@router.delete("/delete/{history_id}")
+async def delete_history(history_id: int,  db: AsyncSession = Depends(get_db)):
+    result = await db.get(DetectionHistory, history_id)
+    if not result:
+        raise HTTPException(f"Wrong history_id: {history_id}")
+
+    await db.delete(result)
+
+    await db.commit()
+    return {"message": f"Deleted history {history_id}"}
+
+@router.put("update/{history_id}")
+async def update_history(history_id: int, update_history: UpdateHistory, db: AsyncSession = Depends(get_db)):
+    query = select(DetectionHistory).where(DetectionHistory.id == history_id)
+    result = await db.execute(query)
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(f"Wrong history id: {history_id}")
+
+    update_data = update_history.model_dump() 
+    for field, value in update_data.items():
+        setattr(user, field, value)
+    
+
+    await db.commit()
+    await db.refresh(user)
+    return {"message": "Data updated successfully"}
+
+
+
