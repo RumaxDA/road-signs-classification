@@ -2,15 +2,19 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from ultralytics import YOLO
-from app.core.config import settings
+from app.core.config import settings 
 
 class TrafficSignSystem:
     def __init__(self, yolo_path, cnn_path, img_size):
         print("--- Inicjalizacja systemów rozpoznawania ---")
         self.detector = YOLO(yolo_path)
         self.classifier = tf.keras.models.load_model(cnn_path)
+        self.model = cnn_path
         self.img_size = img_size
         self.min_confidence = 0.5 
+
+        self.model_name = self.model.split("/")[1]
+        print(self.model_name)
         
 
         self.classes = {
@@ -39,7 +43,12 @@ class TrafficSignSystem:
         img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
         img = cv2.GaussianBlur(img, (3, 3), 0)
         img = cv2.resize(img, (self.img_size, self.img_size), interpolation=cv2.INTER_CUBIC)
-        img = img.astype("float32") # / 255.0 TRANSFER LEARNING PROCESSING
+        if "efficientnet" in self.model_name:
+            print('preprocesing dla efficientneta') 
+            img = img.astype("float32") 
+        else:
+            print('/255 dla CNN') 
+            img = img.astype("float32") / 255.0 
         return np.expand_dims(img, axis=0)
 
     def predict(self, frame):
@@ -96,6 +105,12 @@ if __name__ == "__main__":
     TL_PATH = settings.TL_MODEL_PATH
     
     system = TrafficSignSystem(YOLO_PATH, TL_PATH, 224)
+
+    if "efficientnet" in system.model_name:
+        print('preprocesing dla efficientneta') 
+    else:
+        print('/255 dla CNN') 
+   
     
     test_img = cv2.imread('app/services/sign25.jpg')
     if test_img is not None:
